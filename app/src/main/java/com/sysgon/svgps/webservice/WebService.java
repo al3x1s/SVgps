@@ -17,7 +17,10 @@ package com.sysgon.svgps.webservice;
  */
 
 
+import com.sysgon.svgps.data.model.Device;
 import com.sysgon.svgps.data.model.User;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -33,9 +36,8 @@ public interface WebService {
     @GET("/api/logout")
     Call<Void> logout();
 
-
-//    @GET("/api/android/devices")
-//    Call<List<Device>> getDevices();
+    @GET("/api/android/devices")
+    Call<List<Device>> getDevices();
 
 //    @GET("/api/commandtypes")
 //    Call<List<CommandType>> getCommandTypes(@Query("deviceId") long deviceId);

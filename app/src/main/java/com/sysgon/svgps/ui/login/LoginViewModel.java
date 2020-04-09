@@ -54,7 +54,6 @@ public class LoginViewModel extends ViewModel {
         application.getServiceAsync(new MainApplication.GetServiceCallback() {
             @Override
             public void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service) {
-                Log.i("TEST", "LoginViewModer onServiceReady");
                 Result<User> result = loginRepository.login(application.getUser());
                 if (result instanceof Result.Success) {
                     User data = ((Result.Success<User>) result).getData();
@@ -68,7 +67,6 @@ public class LoginViewModel extends ViewModel {
 
             @Override
             public boolean onFailure() {
-                Log.i("TEST", "onFailure");
                 Result<User> result = loginRepository.login(null);
                 loginResult.setValue(new LoginResult(R.string.login_failed));
                 preferences.edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();

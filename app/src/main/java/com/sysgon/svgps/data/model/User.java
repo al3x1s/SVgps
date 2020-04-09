@@ -1,5 +1,8 @@
 package com.sysgon.svgps.data.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /*
  * Copyright 2016 Irving Gonzalez (ialexis93@gmail.com)
  *
@@ -16,6 +19,7 @@ package com.sysgon.svgps.data.model;
  * limitations under the License.
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
     private long id;
 
@@ -55,11 +59,12 @@ public class User {
         this.name = name;
     }
 
-    private String speedunit;
+    private String speedUnit;
 
-    public String getSpeedunit() { return speedunit; }
+    public String getSpeedUnit() { return speedUnit; }
 
-    public void setSpeedunit(String speedUnit) { this.speedunit = speedUnit; }
+    @JsonProperty("speedunit")
+    public void setSpeedUnit(String speedUnit) { this.speedUnit = speedUnit; }
 
     private double latitude;
 

@@ -38,7 +38,8 @@ import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
 
 //https://developer.android.com/jetpack/docs/guide#connect-viewmodel-repository
 
@@ -52,7 +53,12 @@ public class MainApplication extends Application {
     public static final String PREFERENCE_EMAIL = "email";
     public static final String PREFERENCE_PASSWORD = "password";
 
-    public static final String DEFAULT_SERVER = "http://162.248.52.101:3000"; // local - http://10.0.2.2:8082
+    public static final String DEFAULT_SERVER = "http://162.248.52.101"; // local - http://10.0.2.2:8082
+    public static final String DEFAULT_WEP_PORT = ":3000";
+    public static final String DEFAULT_SOCKET_PORT = ":3001";
+
+
+
 
     public interface GetServiceCallback {
         void onServiceReady(OkHttpClient client, Retrofit retrofit, WebService service);
@@ -69,15 +75,15 @@ public class MainApplication extends Application {
     private final List<GetServiceCallback> callbacks = new LinkedList<>();
 
     public void getServiceAsync(GetServiceCallback callback) {
-        checkNetworkConnection();
-
-        if (service != null) {
-            callback.onServiceReady(client, retrofit, service);
-        } else {
-            if (callbacks.isEmpty()) {
-                initService();
+        if(checkNetworkConnection()){
+            if (service != null) {
+                callback.onServiceReady(client, retrofit, service);
+            } else {
+                if (callbacks.isEmpty()) {
+                    initService();
+                }
+                callbacks.add(callback);
             }
-            callbacks.add(callback);
         }
     }
 
@@ -85,12 +91,15 @@ public class MainApplication extends Application {
     public User getUser() { return user; }
 
     public void removeService() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.edit().putBoolean(MainApplication.PREFERENCE_AUTHENTICATED, false).apply();
+
         service = null;
         user = null;
     }
 
     private void initService() {
-        final String url = DEFAULT_SERVER;
+        final String url = DEFAULT_SERVER + DEFAULT_WEP_PORT;
         String email = preferences.getString(PREFERENCE_EMAIL, null);
         String password = preferences.getString(PREFERENCE_PASSWORD, null);
 
@@ -105,10 +114,10 @@ public class MainApplication extends Application {
             retrofit = new Retrofit.Builder()
                     .client(client)
                     .baseUrl(url)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(JacksonConverterFactory.create())
                     .build();
         } catch (IllegalArgumentException e) {
-            Log.e("Error Main Application", e.getMessage());
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
             for (GetServiceCallback callback : callbacks) {
                 callback.onFailure();
             }
@@ -142,11 +151,6 @@ public class MainApplication extends Application {
         });
     }
 
-
-    /**
-     * Check whether the device is connected, and if so, whether the connection
-     * is wifi or mobile (it could be something else).
-     */
     private boolean checkNetworkConnection() {
         ConnectivityManager connMgr =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -161,8 +165,8 @@ public class MainApplication extends Application {
             }
             return true;
         } else {
-            Log.i(TAG_INTERNET, "No wireless or mobile connection.");
-            Toast.makeText(this, "No tienes una conexion a Internet", Toast.LENGTH_LONG).show();
+            Log.i(TAG_INTERNET, getString(R.string.no_internet));
+            Toast.makeText(this, R.string.no_internet, Toast.LENGTH_LONG).show();
             return false;
         }
     }
